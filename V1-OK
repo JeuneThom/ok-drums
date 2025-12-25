@@ -1,0 +1,58 @@
+setcpm(160/4)
+
+samples({
+  bass: 'https://raw.githubusercontent.com/JeuneThom/ok-drums/main/Vilhelm.%20-%20%2034-RD%20BASS.wav',
+  kickbass: 'https://raw.githubusercontent.com/JeuneThom/ok-drums/main/Vilhelm.%20-%20%204K%20KICKBASS.wav',
+  kickdrop: 'https://raw.githubusercontent.com/JeuneThom/ok-drums/main/Vilhelm.%20-%2016-RECORD%20DESIGN%2023.wav',
+  hh1: 'https://raw.githubusercontent.com/JeuneThom/ok-drums/main/Hats/Vilhelm.%20-%20%20BB%20Hat.wav',
+  loop1: 'https://raw.githubusercontent.com/JeuneThom/ok-drums/main/Loops/Vilhelm.%20-%20Glory%20loop%20F%23min%20140%20bpm.wav'
+})
+
+// 1. LE DROP (Lui il ne change pas, donc on peut le faire simple)
+const drop = stack(
+  
+  s("kickdrop*4")
+  .clip(1)
+  .shape(0.5)
+  .lpf(2000),
+  
+  s("[hh1 ~ hh1 ~]*4"),
+
+  s("loop1")
+  .loopAt(1)
+  .legato(1)
+  .gain(0.8)
+)
+
+// 2. L'ARRANGEMENT FINAL
+cat(
+  // --- LA MONTÉE (La partie magique) ---
+  // On liste les notes, et on dit : "Pour chaque note (n), joue la basse avec cette note"
+  ...[24, 24, 26, 29, 32, 36, 36, 48].map(n => 
+    s("bass*4 kickbass(1,4)")
+      .note(n)      // Ici on applique la note fixe pour ce tour
+      .cut(1)
+      ._scope()
+  ),
+
+  // --- LE DROP ---
+  // On le répète 8 fois (ici ça marche car le drop est toujours pareil)
+  ...Array(8).fill(drop) 
+)
+
+
+stack(
+    
+  s("kickdrop")
+  .clip(1)
+  .shape(0.5)
+  .lpf(2000)
+  .room(0.25)
+  .gain(0.5),
+
+  s("loop1")
+  .loopAt(4)
+  .gain(0.8)
+  .lpf(6000)
+  ._scope()
+)
